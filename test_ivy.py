@@ -32,7 +32,7 @@ data = data_ivy['ivy_split']
 print("*******************************************")
 print("************* Ivy Validation **************")
 print("*******************************************")
-load_path = os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%d.pt' % (opt.model_name, opt.k))
+load_path = os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s.pt' % (opt.model_name, opt.k))
 model_ckpt = torch.load(load_path, map_location=device)
 
 #### Loading Env
