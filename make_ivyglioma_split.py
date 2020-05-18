@@ -98,7 +98,7 @@ def getAlignedMultimodalData_TCGA(opt, model, device, all_dataset, pat_split, pa
 
         for img_fname in pat2img[pat_name]:
             grph_fname = img_fname.rstrip('.png')+'.pt'
-            assert grph_fname in os.listdir(os.path.join(opt.dataroot_tcga, '%s_%s' % (opt.roi_dir_tcga, opt.graph_feat_type), 'pt'))
+            assert grph_fname in os.listdir(os.path.join(opt.dataroot_tcga, '%s_%s' % (opt.roi_dir_tcga, opt.graph_feat_type)))
             assert all_dataset[all_dataset['TCGA ID'] == pat_name].shape[0] == 1
 
             x_patname.append(pat_name)
