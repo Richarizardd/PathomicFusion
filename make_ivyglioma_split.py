@@ -163,14 +163,16 @@ train_data = {'x_patname': train_x_patname,
               'x_grph':train_x_grph,
               'x_omic':train_x_omic,
               'e':np.array(train_e, dtype=np.float64), 
-              't':np.array(train_t, dtype=np.float64)}
+              't':np.array(train_t, dtype=np.float64),
+              'g':np.array(train_t, dtype=np.float64)}
 
 test_data = {'x_patname': test_x_patname,
              'x_path':np.array(test_x_path),
              'x_grph':test_x_grph,
              'x_omic':test_x_omic,
              'e':np.array(test_e, dtype=np.float64),
-             't':np.array(test_t, dtype=np.float64)}
+             't':np.array(test_t, dtype=np.float64),
+             'g':np.array(train_t, dtype=np.float64)}
 
 dataset = {'train':train_data, 'test':test_data}
 data_dict['ivy_split'] = dataset
