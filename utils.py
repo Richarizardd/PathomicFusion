@@ -37,8 +37,8 @@ import torch.nn as nn
 from torch.nn import init, Parameter
 from torch.utils.data._utils.collate import *
 from torch.utils.data.dataloader import default_collate
-#import torch_geometric
-#from torch_geometric.data import Batch
+import torch_geometric
+from torch_geometric.data import Batch
 
 
 
