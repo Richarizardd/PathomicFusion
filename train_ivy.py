@@ -22,24 +22,20 @@ if not os.path.exists(os.path.join(opt.checkpoints_dir, opt.exp_name)): os.maked
 if not os.path.exists(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name)): os.makedirs(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name))
 
 ### 2. Initializes Data
-
-data_ivy_path = '%s/splits/ivy%s_%s_%d%s.pkl' % (opt.dataroot_ivy, opt.k, opt.opt.which_structures, opt.use_vgg_features, '_rnaseq')
-print("Loading %s" % data_cv_path)
+data_ivy_path = '%s/splits/ivy%s_%s_%d%s.pkl' % (opt.dataroot, opt.k, opt.which_structures, opt.use_vgg_features, '_rnaseq')
+print("Loading %s" % data_ivy_path)
 data_ivy = pickle.load(open(data_ivy_path, 'rb'))
-data = data_cv['ivy_split']
+data = data_ivy['ivy_split']
 
 ### 3. Sets-Up Main Loop
 print("*******************************************")
-print("*************** Ivy Training **************")
+print("************* Ivy Validation **************")
 print("*******************************************")
-
 model, optimizer, metric_logger = train(opt, data, device, k)
 
 ### 3.2 Evalutes Train + Test Error, and Saves Model
 loss_train, cindex_train, pvalue_train, surv_acc_train, grad_acc_train, pred_train = test(opt, model, data, 'train', device)
 loss_test, cindex_test, pvalue_test, surv_acc_test, grad_acc_test, pred_test = test(opt, model, data, 'test', device)
-
-
 
 ### 3.2 Evalutes Train + Test Error, and Saves Model
 loss_test, cindex_test, pvalue_test, surv_acc_test, grad_acc_test, pred_test = test(opt, model, data, 'test', device)
