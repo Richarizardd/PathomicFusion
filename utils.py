@@ -37,8 +37,8 @@ import torch.nn as nn
 from torch.nn import init, Parameter
 from torch.utils.data._utils.collate import *
 from torch.utils.data.dataloader import default_collate
-import torch_geometric
-from torch_geometric.data import Batch
+#import torch_geometric
+#from torch_geometric.data import Batch
 
 
 
@@ -517,6 +517,62 @@ def getCleanAllDataset(dataroot='./data/TCGA_GBMLGG/', ignore_missing_moltype=Fa
     all_dataset['censored'] = 1 - all_dataset['censored']
     return metadata, all_dataset
 
+
+def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic', which_structures='default', bulk=True):
+    row_genes = pd.read_csv(os.path.join(dataroot, folder, 'rows-genes.csv'))
+    column_samples = pd.read_csv(os.path.join(dataroot, folder, 'columns-samples.csv'))
+    fpkm_table = pd.read_csv(os.path.join(dataroot, folder, 'fpkm_table.csv'), index_col=0)
+    tumor_details = pd.read_csv(os.path.join(dataroot, folder, 'tumor_details.csv'))
+    
+    fpkm_table.index = [g.lower() for g in row_genes['gene_symbol']]
+    fpkm_table = fpkm_table.T
+    assert fpkm_table.index.all(column_samples['rna_well_id'])
+
+    if which_structures == 'default':
+        which_structures = ['CT-reference-histology', 'CTmvp-reference-histology', 'CTpan-reference-histology', 'LE-reference-histology', 'IT-reference-histology']
+    elif  which_structures == 'all':
+        which_structures = column_samples['structure_abbreviation'].unique()
+    elif which_structres == 'two':
+        which_structures = ['CT-reference-histology', 'CTmvp-reference-histology']
+    else:
+        print("Error")
+        
+    select_structures = column_samples['structure_abbreviation'].isin(which_structures)
+    fpkm_table = fpkm_table[np.array(select_structures)]
+    column_samples = column_samples[np.array(select_structures)]
+    column_samples = column_samples.sort_values(['tumor_name', 'block_name', 'structure_abbreviation'])
+
+    fpkm_table_mean = fpkm_table.copy()
+    fpkm_table_mean.index = column_samples['tumor_name']
+    if bulk:
+        fpkm_table_mean = fpkm_table_mean.groupby('tumor_name').mean()
+
+    ignore_missing_moltype, ignore_missing_histype, use_rnaseq = False, False, True
+    metadata_tcga, all_dataset_tcga = getCleanAllDataset(dataroot='./data/TCGA_GBMLGG/', 
+                                     ignore_missing_moltype=ignore_missing_moltype, 
+                                     ignore_missing_histype=ignore_missing_histype, 
+                                     use_rnaseq=use_rnaseq)
+
+    all_dataset_tcga.columns = [g.rstrip('_rnaseq').lower() for g in all_dataset_tcga.columns]
+    genes_overlap = list(set(all_dataset_tcga.columns).intersection(set(fpkm_table.columns)))
+    fpkm_table_mean.shape
+
+    metadata_tcga = [metadata_tcga[-1]] + list(metadata_tcga[:-1])
+    all_dataset_tcga.columns = metadata_tcga + list(all_dataset_tcga.columns[len(metadata_tcga):])
+    all_dataset_tcga = all_dataset_tcga.loc[:,~all_dataset_tcga.columns.duplicated()]
+    best_patients = fpkm_table_mean.index
+    all_dataset_ivy = tumor_details[tumor_details['tumor_name'].isin(best_patients)]
+    all_dataset_ivy = all_dataset_ivy[~all_dataset_ivy['survival_days'].isna()]
+    all_dataset_ivy['Survival months'] = all_dataset_ivy['survival_days'] / 30
+    all_dataset_ivy['censored'] = 1
+    all_dataset_ivy.index = all_dataset_ivy['tumor_name']
+    all_dataset_ivy.index.name = None
+    all_dataset_ivy_feats = fpkm_table_mean[genes_overlap]
+    all_dataset_ivy_feats.index.name = None
+    all_dataset_ivy = all_dataset_ivy.join(all_dataset_ivy_feats)
+    all_dataset_ivy.index.name = 'tumor_name'
+    metadata_ivy = all_dataset_ivy.columns[:12]
+    return (metadata_ivy, all_dataset_ivy), (metadata_tcga, all_dataset_tcga), genes_overlap
 
 
 ################
