@@ -9,7 +9,7 @@ from PIL import Image
 from sklearn import preprocessing
 
 # Env
-#from networks import define_net
+from networks import define_net
 from utils import getCleanAllDataset, getCleanIvyGlioma
 import torch
 from torchvision import transforms
