@@ -564,7 +564,7 @@ def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic', which_stru
     all_dataset_ivy = tumor_details[tumor_details['tumor_name'].isin(best_patients)]
     all_dataset_ivy = all_dataset_ivy[~all_dataset_ivy['survival_days'].isna()]
     all_dataset_ivy['Survival months'] = all_dataset_ivy['survival_days'] / 30
-    all_dataset_ivy['censored'] = 0
+    all_dataset_ivy['censored'] = 1
     all_dataset_ivy.index = all_dataset_ivy['tumor_name']
     all_dataset_ivy.index.name = None
     all_dataset_ivy_feats = fpkm_table_mean[genes_overlap]
