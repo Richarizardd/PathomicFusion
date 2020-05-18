@@ -146,8 +146,8 @@ if opt.use_vgg_features:
 pat_train = pnas_splits.index[pnas_splits[opt.k] == 'Train']
 pat_test = list(all_dataset_ivy['tumor_name'])
 
-out = getAlignedMultimodalData_Ivy(opt, model, device, all_dataset_ivy, pat_test, pat2img_ivy, genes_overlap)
-test_x_patname, test_x_path, test_x_grph, test_x_omic, test_e, test_t = out
+out = getAlignedMultimodalData_TCGA(opt, model, device, all_dataset_tcga, pat_train, pat2img_tcga, genes_overlap)
+train_x_patname, train_x_path, train_x_grph, train_x_omic, train_e, train_t = out
 out = getAlignedMultimodalData_Ivy(opt, model, device, all_dataset_ivy, pat_test, pat2img_ivy, genes_overlap)
 test_x_patname, test_x_path, test_x_grph, test_x_omic, test_e, test_t = out
 
