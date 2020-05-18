@@ -21,7 +21,7 @@ def parse_args():
     parser.add_argument('--dataroot_tcga', type=str, default='./data/TCGA_GBMLGG/', help="datasets")
     parser.add_argument('--which_structures', type=str, default='default', help="parse ivyglioma")
     parser.add_argument('--bulk', type=int, default=1, help="to average")
-    parser.add_argument('--use_vgg_features', type=int, default=0, help='use model')
+    parser.add_argument('--use_vgg_features', type=int, default=1, help='use model')
     parser.add_argument('--graph_feat_type', type=str, default='cpc', help="graph features to use")
 
     parser.add_argument('--roi_dir_ivy', type=str, default='IvyGBM_st', help="to average")
