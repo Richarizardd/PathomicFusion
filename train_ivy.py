@@ -31,7 +31,7 @@ data = data_ivy['ivy_split']
 print("*******************************************")
 print("************* Ivy Validation **************")
 print("*******************************************")
-model, optimizer, metric_logger = train(opt, data, device, k)
+model, optimizer, metric_logger = train(opt, data, device, int(opt.k))
 
 ### 3.2 Evalutes Train + Test Error, and Saves Model
 loss_train, cindex_train, pvalue_train, surv_acc_train, grad_acc_train, pred_train = test(opt, model, data, 'train', device)
