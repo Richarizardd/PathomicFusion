@@ -59,13 +59,13 @@ def regularize_weights(model, reg_type=None):
 def regularize_path_weights(model, reg_type=None):
     l1_reg = None
     
-    for W in model.module.classifier.parameters():
+    for W in model.classifier.parameters():
         if l1_reg is None:
             l1_reg = torch.abs(W).sum()
         else:
             l1_reg = l1_reg + torch.abs(W).sum() # torch.abs(W).sum() is equivalent to W.norm(1)
 
-    for W in model.module.linear.parameters():
+    for W in model.linear.parameters():
         if l1_reg is None:
             l1_reg = torch.abs(W).sum()
         else:
