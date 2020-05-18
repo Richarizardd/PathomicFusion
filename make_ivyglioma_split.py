@@ -175,4 +175,4 @@ test_data = {'x_patname': test_x_patname,
 dataset = {'train':train_data, 'test':test_data}
 data_dict['ivy_split'] = dataset
 
-pickle.dump(data_dict, open('%s/splits/gbmlgg15cv_%s_%d_%d_%d%s.pkl' % (opt.dataroot, opt.roi_dir, opt.ignore_missing_moltype, opt.ignore_missing_histype, opt.use_vgg_features, '_rnaseq' if opt.use_rnaseq else ''), 'wb'))
+pickle.dump(data_dict, open('%s/splits/ivy_%d%s.pkl' % (opt.use_vgg_features, '_rnaseq'), 'wb'))
