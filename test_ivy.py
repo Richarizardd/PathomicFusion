@@ -50,7 +50,6 @@ model.load_state_dict(model_state_dict)
 loss_test, cindex_test, pvalue_test, surv_acc_test, grad_acc_test, pred_test = test(opt, model, data, 'test', device)
 print("[Final] Apply model to testing set: C-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
 logging.info("[Final] Apply model to testing set: cC-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
-results.append(cindex_test)
 
 ### 3.3 Saves Model
 pickle.dump(pred_test, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s_%s_pred_test.pkl' % (opt.model_name, opt.k, opt.which_structures)), 'wb'))
