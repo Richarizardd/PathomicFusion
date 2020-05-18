@@ -133,7 +133,7 @@ def getAlignedMultimodalData_Ivy(opt, model, device, all_dataset, pat_split, pat
 
 model = None
 if opt.use_vgg_features:
-    load_path = os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s.pt' % (opt.model_name, k))
+    load_path = os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s.pt' % (opt.model_name, opt.k))
     model_ckpt = torch.load(load_path, map_location=device)
     model_state_dict = model_ckpt['model_state_dict']
     if hasattr(model_state_dict, '_metadata'): del model_state_dict._metadata
@@ -175,4 +175,4 @@ test_data = {'x_patname': test_x_patname,
 dataset = {'train':train_data, 'test':test_data}
 data_dict['ivy_split'] = dataset
 
-pickle.dump(data_dict, open('%s/splits/ivy_%d%s.pkl' % (opt.use_vgg_features, '_rnaseq'), 'wb'))
+pickle.dump(data_dict, open('%s/splits/ivy%s_%d%s.pkl' % (opt.dataroot_ivy, opt.k, opt.use_vgg_features, '_rnaseq'), 'wb'))
