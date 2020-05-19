@@ -240,7 +240,7 @@ class NormalizeEdgesV2(object):
     r"""Column-normalizes node features to sum-up to one."""
 
     def __call__(self, data):
-        data.edge_attr = data.edge_attr.type(torch.FloatTensor)
+        data.edge_attr = data.edge_attr.type(torch.cuda.FloatTensor)
         data.edge_attr = data.edge_attr / data.edge_attr.max(0, keepdim=True)[0]#.type(torch.cuda.FloatTensor)
         return data
 
