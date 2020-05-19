@@ -229,7 +229,7 @@ class NormalizeFeaturesV2(object):
 
     def __call__(self, data):
         data.x[:, :12] = data.x[:, :12] / data.x[:, :12].max(0, keepdim=True)[0]
-        data.x = data.x.type(torch.cuda.FloatTensor)
+        data.x = data.x.type(torch.FloatTensor)
         return data
 
     def __repr__(self):
@@ -240,7 +240,7 @@ class NormalizeEdgesV2(object):
     r"""Column-normalizes node features to sum-up to one."""
 
     def __call__(self, data):
-        data.edge_attr = data.edge_attr.type(torch.cuda.FloatTensor)
+        data.edge_attr = data.edge_attr.type(torch.FloatTensor)
         data.edge_attr = data.edge_attr / data.edge_attr.max(0, keepdim=True)[0]#.type(torch.cuda.FloatTensor)
         return data
 
@@ -258,11 +258,11 @@ class GraphNet(torch.nn.Module):
         self.act = act
 
         self.conv1 = SAGEConv(features, nhid)
-        self.pool1 = SAGPooling(nhid, ratio=pooling_ratio, gnn=GNN)#, nonlinearity=nonlinearity)
+        self.pool1 = SAGPooling(nhid, ratio=pooling_ratio)#, nonlinearity=nonlinearity)
         self.conv2 = SAGEConv(nhid, nhid)
-        self.pool2 = SAGPooling(nhid, ratio=pooling_ratio, gnn=GNN)#, nonlinearity=nonlinearity)
+        self.pool2 = SAGPooling(nhid, ratio=pooling_ratio)#, nonlinearity=nonlinearity)
         self.conv3 = SAGEConv(nhid, nhid)
-        self.pool3 = SAGPooling(nhid, ratio=pooling_ratio, gnn=GNN)#, nonlinearity=nonlinearity)
+        self.pool3 = SAGPooling(nhid, ratio=pooling_ratio)#, nonlinearity=nonlinearity)
 
         self.lin1 = torch.nn.Linear(nhid*2, nhid)
         self.lin2 = torch.nn.Linear(nhid, grph_dim)
@@ -283,15 +283,15 @@ class GraphNet(torch.nn.Module):
 
         #x, edge_index, edge_attr, batch = data.x.type(torch.cuda.FloatTensor), data.edge_index.type(torch.cuda.LongTensor), data.edge_attr.type(torch.cuda.FloatTensor), data.batch
         x = F.relu(self.conv1(x, edge_index))
-        x, edge_index, edge_attr, batch, _ = self.pool1(x, edge_index, edge_attr, batch)
+        x, edge_index, edge_attr, batch, _, _ = self.pool1(x, edge_index, edge_attr, batch)
         x1 = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
 
         x = F.relu(self.conv2(x, edge_index))
-        x, edge_index, edge_attr, batch, _ = self.pool2(x, edge_index, edge_attr, batch)
+        x, edge_index, edge_attr, batch, _, _ = self.pool2(x, edge_index, edge_attr, batch)
         x2 = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
 
         x = F.relu(self.conv3(x, edge_index))
-        x, edge_index, edge_attr, batch, _ = self.pool3(x, edge_index, edge_attr, batch)
+        x, edge_index, edge_attr, batch, _, _ = self.pool3(x, edge_index, edge_attr, batch)
         x3 = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
 
         x = x1 + x2 + x3 
