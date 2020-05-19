@@ -31,7 +31,7 @@ class PathgraphomicDatasetLoader(Dataset):
         self.g = data[split]['g']
         self.mode = mode
         
-        if split == 'train'
+        if split == 'train':
             self.transforms = transforms.Compose([
                                 transforms.RandomHorizontalFlip(0.5),
                                 transforms.RandomVerticalFlip(0.5),
