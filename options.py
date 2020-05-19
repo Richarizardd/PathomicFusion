@@ -18,6 +18,7 @@ def parse_args():
     
     parser.add_argument('--k', type=str, default='15', help='Which split')
     parser.add_argument('--which_structures', type=str, default='default', help='which structures')
+    parser.add_argument('--roi_dir_vy', type=str, default='IvyGBM_st', help='which structures')
 
     parser.add_argument('--task', type=str, default='surv', help='surv | grad')
     parser.add_argument('--useRNA', type=int, default=0) # Doesn't work at the moment...:(
