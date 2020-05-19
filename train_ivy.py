@@ -37,6 +37,24 @@ model, optimizer, metric_logger = train(opt, data, device, int(opt.k))
 loss_train, cindex_train, pvalue_train, surv_acc_train, grad_acc_train, pred_train = test(opt, model, data, 'train', device)
 loss_test, cindex_test, pvalue_test, surv_acc_test, grad_acc_test, pred_test = test(opt, model, data, 'test', device)
 
+### 3.3 Saves Model
+if len(opt.gpu_ids) > 0 and torch.cuda.is_available():
+    model_state_dict = model.module.cpu().state_dict()
+else:
+    model_state_dict = model.cpu().state_dict()
+
+torch.save({
+	'split':k,
+    'opt': opt,
+    'epoch': opt.niter+opt.niter_decay,
+    'data': data,
+    'model_state_dict': model_state_dict,
+    'optimizer_state_dict': optimizer.state_dict(),
+    'metrics': metric_logger}, 
+    os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%d.pt' % (opt.model_name, k)))
+
+
+
 ### 3.2 Evalutes Train + Test Error, and Saves Model
 loss_test, cindex_test, pvalue_test, surv_acc_test, grad_acc_test, pred_test = test(opt, model, data, 'test', device)
 print("[Final] Apply model to testing set: C-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
