@@ -37,8 +37,8 @@ import torch.nn as nn
 from torch.nn import init, Parameter
 from torch.utils.data._utils.collate import *
 from torch.utils.data.dataloader import default_collate
-import torch_geometric
-from torch_geometric.data import Batch
+#import torch_geometric
+#from torch_geometric.data import Batch
 
 
 
@@ -523,7 +523,7 @@ def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic', which_stru
     column_samples = pd.read_csv(os.path.join(dataroot, folder, 'columns-samples.csv'))
     fpkm_table = pd.read_csv(os.path.join(dataroot, folder, 'fpkm_table.csv'), index_col=0)
     tumor_details = pd.read_csv(os.path.join(dataroot, folder, 'tumor_details.csv'))
-    
+
     fpkm_table.index = [g.lower() for g in row_genes['gene_symbol']]
     fpkm_table = fpkm_table.T
     assert fpkm_table.index.all(column_samples['rna_well_id'])
@@ -536,7 +536,7 @@ def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic', which_stru
         which_structures = ['CT-reference-histology', 'CTmvp-reference-histology']
     else:
         print("Error")
-        
+
     select_structures = column_samples['structure_abbreviation'].isin(which_structures)
     fpkm_table = fpkm_table[np.array(select_structures)]
     column_samples = column_samples[np.array(select_structures)]
@@ -553,13 +553,17 @@ def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic', which_stru
                                      ignore_missing_histype=ignore_missing_histype, 
                                      use_rnaseq=use_rnaseq)
 
-    all_dataset_tcga.columns = [g.rstrip('_rnaseq').lower() for g in all_dataset_tcga.columns]
-    genes_overlap = list(set(all_dataset_tcga.columns).intersection(set(fpkm_table.columns)))
+    all_dataset_tcga.columns = list(all_dataset_tcga.columns[:7]) + [g.lower() for g in all_dataset_tcga.columns[7:]]
+    fpkm_table_mean.columns = [g.lower()+'_rnaseq' for g in fpkm_table.columns]
+    fpkm_table_mean.insert(loc=0, column='codeletion', value=0)
+    fpkm_table_mean.insert(loc=1, column='idh mutation', value=0)
+    genes_overlap = list(set(all_dataset_tcga.columns).intersection(set(fpkm_table_mean.columns)))
+
     fpkm_table_mean.shape
 
     metadata_tcga = [metadata_tcga[-1]] + list(metadata_tcga[:-1])
     all_dataset_tcga.columns = metadata_tcga + list(all_dataset_tcga.columns[len(metadata_tcga):])
-    all_dataset_tcga = all_dataset_tcga.loc[:,~all_dataset_tcga.columns.duplicated()]
+    #all_dataset_tcga = all_dataset_tcga.loc[:,~all_dataset_tcga.columns.duplicated()]
     best_patients = fpkm_table_mean.index
     all_dataset_ivy = tumor_details[tumor_details['tumor_name'].isin(best_patients)]
     all_dataset_ivy = all_dataset_ivy[~all_dataset_ivy['survival_days'].isna()]
