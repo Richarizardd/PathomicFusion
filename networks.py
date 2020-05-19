@@ -229,7 +229,7 @@ class NormalizeFeaturesV2(object):
 
     def __call__(self, data):
         data.x[:, :12] = data.x[:, :12] / data.x[:, :12].max(0, keepdim=True)[0]
-        data.x = data.x.type(torch.FloatTensor)
+        data.x = data.x.type(torch.cuda.FloatTensor)
         return data
 
     def __repr__(self):
