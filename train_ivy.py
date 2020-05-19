@@ -37,6 +37,11 @@ model, optimizer, metric_logger = train(opt, data, device, int(opt.k))
 loss_train, cindex_train, pvalue_train, surv_acc_train, grad_acc_train, pred_train = test(opt, model, data, 'train', device)
 loss_test, cindex_test, pvalue_test, surv_acc_test, grad_acc_test, pred_test = test(opt, model, data, 'test', device)
 
+### 3.2 Evalutes Train + Test Error, and Saves Model
+loss_test, cindex_test, pvalue_test, surv_acc_test, grad_acc_test, pred_test = test(opt, model, data, 'test', device)
+print("[Final] Apply model to testing set: C-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
+logging.info("[Final] Apply model to testing set: cC-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
+
 ### 3.3 Saves Model
 if len(opt.gpu_ids) > 0 and torch.cuda.is_available():
     model_state_dict = model.module.cpu().state_dict()
@@ -51,14 +56,8 @@ torch.save({
     'model_state_dict': model_state_dict,
     'optimizer_state_dict': optimizer.state_dict(),
     'metrics': metric_logger}, 
-    os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%d.pt' % (opt.model_name, k)))
+    os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s.pt' % (opt.model_name, opt.k)))
 
-
-
-### 3.2 Evalutes Train + Test Error, and Saves Model
-loss_test, cindex_test, pvalue_test, surv_acc_test, grad_acc_test, pred_test = test(opt, model, data, 'test', device)
-print("[Final] Apply model to testing set: C-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
-logging.info("[Final] Apply model to testing set: cC-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
 
 ### 3.3 Saves Model
 #pickle.dump(results, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_results.pkl' % opt.model_name), 'wb'))
