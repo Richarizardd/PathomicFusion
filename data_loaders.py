@@ -31,13 +31,20 @@ class PathgraphomicDatasetLoader(Dataset):
         self.g = data[split]['g']
         self.mode = mode
         
-        self.transforms = transforms.Compose([
-                            transforms.RandomHorizontalFlip(0.5),
-                            transforms.RandomVerticalFlip(0.5),
-                            transforms.RandomCrop(opt.input_size_path),
-                            transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.05, hue=0.01),
-                            transforms.ToTensor(),
-                            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        if split == 'train'
+            self.transforms = transforms.Compose([
+                                transforms.RandomHorizontalFlip(0.5),
+                                transforms.RandomVerticalFlip(0.5),
+                                transforms.RandomCrop(opt.input_size_path),
+                                transforms.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.05, hue=0.01),
+                                transforms.ToTensor(),
+                                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        else:
+            self.transforms = transforms.Compose([
+                                transforms.ToTensor(),
+                                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
+
 
     def __getitem__(self, index):
         single_e = torch.tensor(self.e[index]).type(torch.FloatTensor)
