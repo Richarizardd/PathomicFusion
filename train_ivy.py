@@ -44,7 +44,7 @@ else:
     model_state_dict = model.cpu().state_dict()
 
 torch.save({
-	'split':k,
+	'split':opt.k,
     'opt': opt,
     'epoch': opt.niter+opt.niter_decay,
     'data': data,
@@ -61,4 +61,4 @@ print("[Final] Apply model to testing set: C-Index: %.10f, P-Value: %.10e" % (ci
 logging.info("[Final] Apply model to testing set: cC-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
 
 ### 3.3 Saves Model
-pickle.dump(results, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_results.pkl' % opt.model_name), 'wb'))
+#pickle.dump(results, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_results.pkl' % opt.model_name), 'wb'))
