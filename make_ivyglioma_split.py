@@ -118,6 +118,9 @@ def getAlignedMultimodalData_Ivy(opt, model, device, all_dataset, pat_split, pat
         if pat_name not in all_dataset.index: continue
 
         for img_fname in pat2img[pat_name]:
+
+            if "CT" in img_fname:
+                continue
             grph_fname = img_fname.rstrip('.jpg')+'.pt'
             assert grph_fname in os.listdir(os.path.join(opt.dataroot_ivy, '%s_%s' % (opt.roi_dir_ivy, opt.graph_feat_type)))
             assert all_dataset[all_dataset['tumor_name'] == pat_name].shape[0] == 1
