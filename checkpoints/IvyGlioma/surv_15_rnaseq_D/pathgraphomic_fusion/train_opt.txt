@@ -8,7 +8,7 @@
                  dataroot: ./data/IvyGlioma/             	[default: ./data/TCGA_GBMLGG]
              dropout_rate: 0.25                          
               epoch_count: 1                             
-                 exp_name: surv_15_rnaseq                	[default: exp_name]
+                 exp_name: surv_15_rnaseq_D              	[default: exp_name]
                  final_lr: 0.1                           
                  finetune: 1                             
               fusion_type: pofusion_A                    	[default: pofusion]
@@ -24,7 +24,7 @@
                 label_dim: 1                             
                lambda_cox: 1                             
                lambda_nll: 1                             
-               lambda_reg: 0.001                         	[default: 0.0003]
+               lambda_reg: 0.0003                        
                        lr: 0.0001                        	[default: 0.002]
                 lr_policy: linear                        
                   measure: 1                             
@@ -43,7 +43,7 @@
                  patience: 0.005                         
             pooling_ratio: 0.2                           
               print_every: 0                             
-                 reg_type: omic                          
+                 reg_type: none                          	[default: omic]
               roi_dir_ivy: IvyGBMD_st                    	[default: IvyGBM_st]
                   save_at: 20                            
                      skip: 0                             
