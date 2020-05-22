@@ -48,7 +48,7 @@ def parse_args():
 
 opt = parse_args()
 device = torch.device('cuda:{}'.format(opt.gpu_ids[0])) if opt.gpu_ids else torch.device('cpu')
-ivy, tcga, genes_overlap = getCleanIvyGlioma(dataroot=opt.dataroot_ivy, which_structures=opt.which_structures, bulk=opt.bulk)
+ivy, tcga, genes_overlap = getCleanIvyGlioma(dataroot=opt.dataroot_ivy)
 metadata_ivy, all_dataset_ivy = ivy
 metadata_tcga, all_dataset_tcga = tcga
 
@@ -120,7 +120,7 @@ def getAlignedMultimodalData_Ivy(opt, model, device, all_dataset, pat_split, pat
         for img_fname in pat2img[pat_name]:
 
             grph_fname = img_fname.rstrip('.jpg')+'.pt'
-            assert grph_fname in os.listdir(os.path.join(opt.dataroot_ivy, '%s_%s' % (opt.roi_dir_ivy, opt.graph_feat_type)))
+            assert grph_fname in os.listdir(os.path.join(opt.dataroot_ivy, '%s_%s' % (opt.roi_dir_ivy, opt.graph_feat_type), 'pt_bi'))
             assert all_dataset[all_dataset['tumor_name'] == pat_name].shape[0] == 1
 
             x_patname.append(pat_name)
@@ -178,4 +178,4 @@ test_data = {'x_patname': test_x_patname,
 dataset = {'train':train_data, 'test':test_data}
 data_dict['ivy_split'] = dataset
 
-pickle.dump(data_dict, open('%s/splits/%s_%s_%s_%d%s.pkl' % (opt.dataroot_ivy, opt.roi_dir_ivy, opt.k, opt.which_structures, opt.use_vgg_features, '_rnaseq'), 'wb'))
+pickle.dump(data_dict, open('%s/splits/%s_%s_%d%s.pkl' % (opt.dataroot_ivy, opt.roi_dir_ivy, opt.k, opt.use_vgg_features, '_rnaseq'), 'wb'))
