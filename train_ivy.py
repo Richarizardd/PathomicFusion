@@ -22,7 +22,7 @@ if not os.path.exists(os.path.join(opt.checkpoints_dir, opt.exp_name)): os.maked
 if not os.path.exists(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name)): os.makedirs(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name))
 
 ### 2. Initializes Data
-data_ivy_path = '%s/splits/%s_%s_%s_%d%s.pkl' % (opt.dataroot, opt.roi_dir_ivy, opt.k, opt.which_structures, opt.use_vgg_features, '_rnaseq')
+data_ivy_path = '%s/splits/%s_%s_%d%s.pkl' % (opt.dataroot, opt.roi_dir_ivy, opt.k, opt.use_vgg_features, '_rnaseq')
 print("Loading %s" % data_ivy_path)
 data_ivy = pickle.load(open(data_ivy_path, 'rb'))
 data = data_ivy['ivy_split']

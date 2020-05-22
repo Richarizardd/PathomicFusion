@@ -22,7 +22,7 @@ if not os.path.exists(os.path.join(opt.checkpoints_dir, opt.exp_name)): os.maked
 if not os.path.exists(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name)): os.makedirs(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name))
 
 ### 2. Initializes Data
-data_ivy_path = '%s/splits/%s_%s_%s_%d%s.pkl' % (opt.dataroot, opt.roi_dir_ivy, opt.k, opt.which_structures, opt.use_vgg_features, '_rnaseq')
+data_ivy_path = '%s/splits/%s_%s_%d%s.pkl' % (opt.dataroot, opt.roi_dir_ivy, opt.k, opt.use_vgg_features, '_rnaseq')
 print("Loading %s" % data_ivy_path)
 data_ivy = pickle.load(open(data_ivy_path, 'rb'))
 data = data_ivy['ivy_split']
@@ -52,4 +52,4 @@ print("[Final] Apply model to testing set: C-Index: %.10f, P-Value: %.10e" % (ci
 logging.info("[Final] Apply model to testing set: cC-Index: %.10f, P-Value: %.10e" % (cindex_test, pvalue_test))
 
 ### 3.3 Saves Model
-pickle.dump(pred_test, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s_%s_%s_pred_test.pkl' % (opt.model_name, opt.roi_dir_ivy, opt.k, opt.which_structures)), 'wb'))
+pickle.dump(pred_test, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s_%s_pred_test.pkl' % (opt.model_name, opt.roi_dir_ivy, opt.k)), 'wb'))
