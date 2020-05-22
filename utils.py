@@ -518,7 +518,41 @@ def getCleanAllDataset(dataroot='./data/TCGA_GBMLGG/', ignore_missing_moltype=Fa
     return metadata, all_dataset
 
 
-def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic', which_structures='default', bulk=True):
+def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic'):
+    tumor_details = pd.read_csv(os.path.join(dataroot, folder, 'tumor_details.csv'))
+    bulk_rnaseq = pd.read_table(os.path.join(dataroot, folder, 'RNA-seq_Ivybulktumor.txt'))
+    bulk_rnaseq.index = bulk_rnaseq['genesymbol'].str.lower()
+    bulk_rnaseq.index.name = None
+    bulk_rnaseq = bulk_rnaseq.drop(bulk_rnaseq.columns[:5], axis=1)
+    bulk_rnaseq = bulk_rnaseq.drop(['Unnamed: 22', 'Unnamed: 29'], axis=1)
+    bulk_rnaseq = bulk_rnaseq.drop(['W5-1-1', 'W10-1-1', 'W22-1-1', 'W33-1-1'], axis=1)
+    bulk_rnaseq = bulk_rnaseq.T
+    bulk_rnaseq.columns = [g.lower()+'_rnaseq' for g in bulk_rnaseq.columns]
+
+    ignore_missing_moltype, ignore_missing_histype, use_rnaseq = False, False, True
+    metadata_tcga, all_dataset_tcga = getCleanAllDataset(dataroot='./data/TCGA_GBMLGG/', 
+                                     ignore_missing_moltype=ignore_missing_moltype, 
+                                     ignore_missing_histype=ignore_missing_histype, 
+                                     use_rnaseq=use_rnaseq)
+
+    all_dataset_tcga.columns = list(all_dataset_tcga.columns[:7]) + [g.lower() for g in all_dataset_tcga.columns[7:]]
+    genes_overlap = list(set(all_dataset_tcga.columns).intersection(set(bulk_rnaseq.columns)))
+
+    all_dataset_ivy = tumor_details#[tumor_details['tumor_name'].isin(best_patients)]
+    all_dataset_ivy = all_dataset_ivy[~all_dataset_ivy['survival_days'].isna()]
+    all_dataset_ivy['Survival months'] = all_dataset_ivy['survival_days'] / 30
+    all_dataset_ivy['censored'] = 1
+    all_dataset_ivy.index = all_dataset_ivy['tumor_name']
+    all_dataset_ivy.index.name = None
+    all_dataset_ivy_feats = bulk_rnaseq[genes_overlap]
+    all_dataset_ivy_feats.index.name = None
+    all_dataset_ivy = all_dataset_ivy.join(all_dataset_ivy_feats, how='inner')
+    all_dataset_ivy.index.name = 'tumor_name'
+    metadata_ivy = all_dataset_ivy.columns[:12]
+    return (metadata_ivy, all_dataset_ivy), (metadata_tcga, all_dataset_tcga), genes_overlap
+
+
+def getCleanIvyGlioma_dep(dataroot='./data/IvyGlioma/', folder='genomic', which_structures='default', bulk=True):
     row_genes = pd.read_csv(os.path.join(dataroot, folder, 'rows-genes.csv'))
     column_samples = pd.read_csv(os.path.join(dataroot, folder, 'columns-samples.csv'))
     fpkm_table = pd.read_csv(os.path.join(dataroot, folder, 'fpkm_table.csv'), index_col=0)

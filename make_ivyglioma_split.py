@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument('--use_vgg_features', type=int, default=1, help='use model')
     parser.add_argument('--graph_feat_type', type=str, default='cpc', help="graph features to use")
 
-    parser.add_argument('--roi_dir_ivy', type=str, default='IvyGBM_st', help="to average")
+    parser.add_argument('--roi_dir_ivy', type=str, default='IvyGBMA_st', help="to average")
     parser.add_argument('--roi_dir_tcga', type=str, default='all_st_patches_512', help="to average")
     parser.add_argument('--model_name', type=str, default='path', help='mode')
     parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints/TCGA_GBMLGG/', help='models are saved here')
@@ -119,8 +119,6 @@ def getAlignedMultimodalData_Ivy(opt, model, device, all_dataset, pat_split, pat
 
         for img_fname in pat2img[pat_name]:
 
-            if "CT" in img_fname:
-                continue
             grph_fname = img_fname.rstrip('.jpg')+'.pt'
             assert grph_fname in os.listdir(os.path.join(opt.dataroot_ivy, '%s_%s' % (opt.roi_dir_ivy, opt.graph_feat_type)))
             assert all_dataset[all_dataset['tumor_name'] == pat_name].shape[0] == 1
