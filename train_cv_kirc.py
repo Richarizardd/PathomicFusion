@@ -25,7 +25,7 @@ roi_dir = 'KIRC_st'
 data_cv_path = '%s/splits/%s_%d.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features)
 print("Loading %s" % data_cv_path)
 data_cv = pickle.load(open(data_cv_path, 'rb'))
-data_cv_splits = data_cv['splits']
+data_cv_splits = data_cv['split']
 results = []
 
 ### 3. Sets-Up Main Loop
