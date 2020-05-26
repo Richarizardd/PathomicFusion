@@ -37,8 +37,8 @@ for k, data in data_cv_splits.items():
 		print("Train-Test Split already made.")
 		continue
 
-	if k >= opt.start_k and k < opt.end_k:
-			
+	if k >= opt.start_k and k <= opt.end_k:
+
 		### 3.1 Trains Model
 		model, optimizer, metric_logger = train(opt, data, device, k)
 
