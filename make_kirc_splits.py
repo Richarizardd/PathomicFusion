@@ -24,8 +24,8 @@ def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.
     clinical = clinical[['Center of sequencing', 'Overall Survival Status', 'Overall Survival (Months)', 'Diagnosis Age', 'Sex']].copy()
     clinical = clinical.rename(columns={'Center of sequencing':'CoS', 'Overall Survival Status':'censored', 'Overall Survival (Months)':'OS_month', 'Diagnosis Age':'Age'})
     clinical['Sex'] = clinical['Sex'].replace({'Male':0, 'Female': 1})
-    clinical['censored'] = clinical['censored'].replace('LIVING', 1)
-    clinical['censored'] = clinical['censored'].replace('DECEASED', 0)
+    clinical['censored'] = clinical['censored'].replace('LIVING', 0) # actually uncensored
+    clinical['censored'] = clinical['censored'].replace('DECEASED', 1) # actually uncensored
     clinical['train'] = 0
     train_cohort = list(clinical['CoS'].value_counts().index[0:2]) + list(clinical['CoS'].value_counts().index[-16:])
     clinical.loc[clinical['CoS'].isin(train_cohort), 'train'] = 1
