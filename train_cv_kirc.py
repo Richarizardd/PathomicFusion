@@ -75,8 +75,8 @@ for k, data in data_cv_splits.items():
 
 	print()
 
-	pickle.dump(pred_train, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%d%spred_train.pkl' % (opt.model_name, k, use_patch)), 'wb'))
-	pickle.dump(pred_test, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%d%spred_test.pkl' % (opt.model_name, k, use_patch)), 'wb'))
+	pickle.dump(pred_train, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%d_pred_train.pkl' % (opt.model_name, k)), 'wb'))
+	pickle.dump(pred_test, open(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%d_pred_test.pkl' % (opt.model_name, k)), 'wb'))
 
 
 print('Split Results:', results)
