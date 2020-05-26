@@ -133,16 +133,18 @@ def getAlignedMultimodalData(opt, model, device, all_dataset, pat_split, pat2img
 
         for img_fname in pat2img[pat_name]:
             grph_fname = img_fname.rstrip('.png')+'.pt'
-            assert grph_fname in os.listdir(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type)))
-            assert all_dataset[all_dataset['TCGA ID'] == pat_name].shape[0] == 1
+            #assert grph_fname in os.listdir(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type)))
+            assert all_dataset[all_dataset.index == pat_name].shape[0] == 1
 
             x_patname.append(pat_name)
             x_path.append(get_vgg_features(model, device, os.path.join(opt.dataroot, opt.roi_dir, img_fname)))
-            x_grph.append(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type), grph_fname))
-            x_omic.append(np.array(all_dataset[all_dataset['TCGA ID'] == pat_name].drop(metadata, axis=1)))
-            e.append(int(all_dataset[all_dataset['TCGA ID']==pat_name]['censored']))
-            t.append(int(all_dataset[all_dataset['TCGA ID']==pat_name]['Survival months']))
-            g.append(int(all_dataset[all_dataset['TCGA ID']==pat_name]['Grade']))
+            #x_grph.append(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type), grph_fname))
+            x_grph.append('NaN')
+            x_omic.append(np.array(all_dataset[all_dataset.index == pat_name].drop(metadata, axis=1)))
+            e.append(int(all_dataset[all_dataset.index==pat_name]['censored']))
+            t.append(int(all_dataset[all_dataset.index==pat_name]['OS_month']))
+            g.append(-1)
+            #g.append(int(all_dataset[all_dataset.index==pat_name]['Grade']))
 
     return x_patname, x_path, x_grph, x_omic, e, t, g
 
