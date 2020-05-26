@@ -16,9 +16,9 @@ def parse_args():
     parser.add_argument('--use_vgg_features', type=int, default=0, help='Use pretrained embeddings')
     parser.add_argument('--use_rnaseq', type=int, default=0, help='Use RNAseq data.')
     
-    parser.add_argument('--k', type=str, default='15', help='Which split')
-    parser.add_argument('--which_structures', type=str, default='default', help='which structures')
     parser.add_argument('--roi_dir', type=str, default='KIRC_st', help='which structures')
+    parser.add_argument('--start_k', type=int, 1)
+    parser.add_argument('--end_k', type=int, 6)
 
     parser.add_argument('--task', type=str, default='surv', help='surv | grad')
     parser.add_argument('--useRNA', type=int, default=0) # Doesn't work at the moment...:(
