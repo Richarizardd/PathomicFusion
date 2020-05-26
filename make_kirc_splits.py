@@ -138,10 +138,9 @@ def getAlignedMultimodalData(opt, model, device, all_dataset, pat_split, pat2img
             #x_grph.append(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type), grph_fname))
             x_omic.append(np.array(all_dataset[all_dataset.index == pat_name].drop(metadata, axis=1)))
             e.append(int(all_dataset[all_dataset.index==pat_name]['censored']))
-            t.append(int(all_dataset[all_dataset.index==pat_name]['Survival months']))
-            g.append(int(all_dataset[all_dataset.index==pat_name]['Grade']))
+            t.append(int(all_dataset[all_dataset.index==pat_name]['OS_month']))
 
-    return x_patname, x_path, x_grph, x_omic, e, t, g
+    return x_patname, x_path, x_grph, x_omic, e, t
 
 
 
