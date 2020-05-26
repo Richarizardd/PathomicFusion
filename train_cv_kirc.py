@@ -22,7 +22,7 @@ if not os.path.exists(os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_
 
 ### 2. Initializes Data
 roi_dir = 'KIRC_st'
-data_path = '%s/splits/%s_%d_%s.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features)
+data_path = '%s/splits/%s_%d.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features)
 print("Loading %s" % data_cv_path)
 data_cv = pickle.load(open(data_cv_path, 'rb'))
 data_cv_splits = data_cv['cv_splits']
