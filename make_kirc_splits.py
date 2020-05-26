@@ -66,6 +66,8 @@ def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.
     
     all_dataset = clinical.join(rnaseq.join(cnv, how='inner').join(mut, how='inner'), how='inner')
     all_dataset.index = all_dataset.index.str[:-3]
+    splits = pd.read_csv(os.path.join(dataroot, 'kirc_splits.csv'), index_col=0)
+    all_dataset = all_dataset.loc[splits.index]
     metadata = ['CoS', 'censored', 'OS_month', 'train']
     return metadata, all_dataset
 
@@ -75,7 +77,7 @@ def parse_args():
     parser.add_argument('--roi_dir', type=str, default='KIRC_st')
     parser.add_argument('--graph_feat_type', type=str, default='cpc', help="graph features to use")
 
-    parser.add_argument('--rnaseq_cutoff', type=int, default=3922)
+    parser.add_argument('--rnaseq_cutoff', type=int, default=240)
     parser.add_argument('--cnv_cutoff', type=float, default=7.0)
     parser.add_argument('--mut_cutoff', type=float, default=5.0)
     parser.add_argument('--use_vgg_features', type=int, default=0)
@@ -126,69 +128,80 @@ def get_vgg_features(model, device, img_path):
 def getAlignedMultimodalData(opt, model, device, all_dataset, pat_split, pat2img):
     x_patname, x_path, x_grph, x_omic, e, t, g = [], [], [], [], [], [], []
 
-    for pat_name in tqdm(pat_split):
+    for pat_name in pat_split:
         if pat_name not in all_dataset.index: continue
-        if pat_name not in pat2img.keys(): continue
 
         for img_fname in pat2img[pat_name]:
-            #grph_fname = img_fname.rstrip('.png')+'.pt'
-            #assert grph_fname in os.listdir(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type)))
-            assert all_dataset[all_dataset.index == pat_name].shape[0] == 1
+            grph_fname = img_fname.rstrip('.png')+'.pt'
+            assert grph_fname in os.listdir(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type)))
+            assert all_dataset[all_dataset['TCGA ID'] == pat_name].shape[0] == 1
 
             x_patname.append(pat_name)
             x_path.append(get_vgg_features(model, device, os.path.join(opt.dataroot, opt.roi_dir, img_fname)))
-            x_grph.append(get_vgg_features(model, device, os.path.join(opt.dataroot, opt.roi_dir, img_fname)))
-            #x_grph.append(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type), grph_fname))
-            x_omic.append(np.array(all_dataset[all_dataset.index == pat_name].drop(metadata, axis=1)))
-            e.append(int(all_dataset[all_dataset.index==pat_name]['censored']))
-            t.append(int(all_dataset[all_dataset.index==pat_name]['OS_month']))
+            x_grph.append(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type), grph_fname))
+            x_omic.append(np.array(all_dataset[all_dataset['TCGA ID'] == pat_name].drop(metadata, axis=1)))
+            e.append(int(all_dataset[all_dataset['TCGA ID']==pat_name]['censored']))
+            t.append(int(all_dataset[all_dataset['TCGA ID']==pat_name]['Survival months']))
+            g.append(int(all_dataset[all_dataset['TCGA ID']==pat_name]['Grade']))
 
-    return x_patname, x_path, x_grph, x_omic, e, t
+    return x_patname, x_path, x_grph, x_omic, e, t, g
 
+### Split Information
+cv_splits = {}
+splits = pd.read_csv(os.path.join(opt.dataroot, 'kirc_splits.csv'), index_col=0)
+splits.columns = [str(k) for k in range(1, 16)]
 
+for k in tqdm(pnas_splits.columns):
+    print('Creating Split %s' % k)
+    pat_train = splits.index[splits[k] == 'Train']
+    pat_test = splits.index[splits[k] == 'Test']
+    cv_splits[int(k)] = {}
 
-pat_train = all_dataset.index[all_dataset['train'] == 1]
-pat_test = all_dataset.index[all_dataset['train'] == 0]
+    model = None
+    if opt.use_vgg_features:
+        load_path = os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s.pt' % (opt.model_name, k))
+        model_ckpt = torch.load(load_path, map_location=device)
+        model_state_dict = model_ckpt['model_state_dict']
+        if hasattr(model_state_dict, '_metadata'): del model_state_dict._metadata
+        model = define_net(opt, None)
+        if isinstance(model, torch.nn.DataParallel): model = model.module
+        print('Loading the model from %s' % load_path)
+        model.load_state_dict(model_state_dict)
+        model.eval()
 
-model = None
-if opt.use_vgg_features:
-    load_path = os.path.join(opt.checkpoints_dir, opt.exp_name, opt.model_name, '%s_%s.pt' % (opt.model_name, k))
-    model_ckpt = torch.load(load_path, map_location=device)
-    model_state_dict = model_ckpt['model_state_dict']
-    if hasattr(model_state_dict, '_metadata'): del model_state_dict._metadata
-    model = define_net(opt, None)
-    if isinstance(model, torch.nn.DataParallel): model = model.module
-    print('Loading the model from %s' % load_path)
-    model.load_state_dict(model_state_dict)
-    model.eval()
+    train_x_patname, train_x_path, train_x_grph, train_x_omic, train_e, train_t, train_g = getAlignedMultimodalData(opt, model, device, all_dataset, pat_train, pat2img)
+    test_x_patname, test_x_path, test_x_grph, test_x_omic, test_e, test_t, test_g = getAlignedMultimodalData(opt, model, device, all_dataset, pat_test, pat2img)
 
-train_x_patname, train_x_path, train_x_grph, train_x_omic, train_e, train_t= getAlignedMultimodalData(opt, model, device, all_dataset, pat_train, pat2img)
-test_x_patname, test_x_path, test_x_grph, test_x_omic, test_e, test_t = getAlignedMultimodalData(opt, model, device, all_dataset, pat_test, pat2img)
+    train_x_omic, train_e, train_t = np.array(train_x_omic).squeeze(axis=1), np.array(train_e, dtype=np.float64), np.array(train_t, dtype=np.float64)
+    test_x_omic, test_e, test_t = np.array(test_x_omic).squeeze(axis=1), np.array(test_e, dtype=np.float64), np.array(test_t, dtype=np.float64)
+        
+    scaler = preprocessing.StandardScaler().fit(train_x_omic)
+    train_x_omic = scaler.transform(train_x_omic)
+    test_x_omic = scaler.transform(test_x_omic)
 
-train_x_omic, train_e, train_t = np.array(train_x_omic).squeeze(axis=1), np.array(train_e, dtype=np.float64), np.array(train_t, dtype=np.float64)
-test_x_omic, test_e, test_t = np.array(test_x_omic).squeeze(axis=1), np.array(test_e, dtype=np.float64), np.array(test_t, dtype=np.float64)
-    
-scaler = preprocessing.StandardScaler().fit(train_x_omic)
-train_x_omic = scaler.transform(train_x_omic)
-test_x_omic = scaler.transform(test_x_omic)
+    train_data = {'x_patname': train_x_patname,
+                  'x_path':np.array(train_x_path),
+                  'x_grph':train_x_grph,
+                  'x_omic':train_x_omic,
+                  'e':np.array(train_e, dtype=np.float64), 
+                  't':np.array(train_t, dtype=np.float64),
+                  'g':np.array(train_g, dtype=np.float64)}
 
-train_data = {'x_patname': train_x_patname,
-              'x_path':np.array(train_x_path),
-              'x_grph':train_x_grph,
-              'x_omic':train_x_omic,
-              'e':np.array(train_e, dtype=np.float64), 
-              't':np.array(train_t, dtype=np.float64)}
+    test_data = {'x_patname': test_x_patname,
+                 'x_path':np.array(test_x_path),
+                 'x_grph':test_x_grph,
+                 'x_omic':test_x_omic,
+                 'e':np.array(test_e, dtype=np.float64),
+                 't':np.array(test_t, dtype=np.float64),
+                 'g':np.array(test_g, dtype=np.float64)}
 
-test_data = {'x_patname': test_x_patname,
-             'x_path':np.array(test_x_path),
-             'x_grph':test_x_grph,
-             'x_omic':test_x_omic,
-             'e':np.array(test_e, dtype=np.float64),
-             't':np.array(test_t, dtype=np.float64)}
+    dataset = {'train':train_data, 'test':test_data}
+    cv_splits[int(k)] = dataset
+
 
 ### Dictionary file containing split information
 data_dict = {}
 data_dict['all_dataset'] = all_dataset
-data_dict['split'] = {'train':train_data, 'test':test_data}
+data_dict['split'] = cv_splits
 
-pickle.dump(data_dict, open('%s/splits/%s_%d_%s.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features, 'rnaseq%s' % str(opt.rnaseq_cutoff)), 'wb'))
+pickle.dump(data_dict, open('%s/splits/%s_%d_%s.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features), 'wb'))
