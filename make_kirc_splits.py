@@ -69,8 +69,8 @@ def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataroot', type=str, default='./data/TCGA_GBMLGG/', help="datasets")
-    parser.add_argument('--roi_dir', type=str, default='all_st')
+    parser.add_argument('--dataroot', type=str, default='./data/TCGA_KIRC/', help="datasets")
+    parser.add_argument('--roi_dir', type=str, default='KIRC_st')
     parser.add_argument('--graph_feat_type', type=str, default='cpc', help="graph features to use")
 
     parser.add_argument('--rnaseq_cutoff', type=int, default=3922)
@@ -80,7 +80,7 @@ def parse_args():
     parser.add_argument('--use_rnaseq', type=int, default=0)
 
     parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints/TCGA_KIRC/', help='models are saved here')
-    parser.add_argument('--exp_name', type=str, default='surv_15_rnaseq_all', help='name of the project. It decides where to store samples and models')
+    parser.add_argument('--exp_name', type=str, default='surv_15_rnaseq_3922', help='name of the project. It decides where to store samples and models')
     parser.add_argument('--gpu_ids', type=str, default='0,1,2,3', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
     parser.add_argument('--mode', type=str, default='path', help='mode')
     parser.add_argument('--model_name', type=str, default='path', help='mode')
