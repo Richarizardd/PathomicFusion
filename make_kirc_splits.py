@@ -15,6 +15,8 @@ import torch
 from torchvision import transforms
 from options import parse_gpuids
 
+from tqdm import tqdm
+
 def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.0, mut_cutoff=5.0):
     ### Clinical variables
     clinical = pd.read_table(os.path.join(dataroot, './kirc_tcga_pan_can_atlas_2018_clinical_data.tsv'), index_col=2)
@@ -124,8 +126,9 @@ def get_vgg_features(model, device, img_path):
 def getAlignedMultimodalData(opt, model, device, all_dataset, pat_split, pat2img):
     x_patname, x_path, x_grph, x_omic, e, t, g = [], [], [], [], [], [], []
 
-    for pat_name in pat_split:
+    for pat_name in tqdm(pat_split):
         if pat_name not in all_dataset.index: continue
+        if pat_name not in pat2img.keys(): continue
 
         for img_fname in pat2img[pat_name]:
             #grph_fname = img_fname.rstrip('.png')+'.pt'
