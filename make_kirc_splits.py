@@ -206,4 +206,4 @@ data_dict = {}
 data_dict['all_dataset'] = all_dataset
 data_dict['split'] = cv_splits
 
-pickle.dump(data_dict, open('%s/splits/%s_%d_%s.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features), 'wb'))
+pickle.dump(data_dict, open('%s/splits/%s_%d.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features), 'wb'))
