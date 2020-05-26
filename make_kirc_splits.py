@@ -151,7 +151,7 @@ cv_splits = {}
 splits = pd.read_csv(os.path.join(opt.dataroot, 'kirc_splits.csv'), index_col=0)
 splits.columns = [str(k) for k in range(1, 16)]
 
-for k in tqdm(pnas_splits.columns):
+for k in tqdm(splits.columns):
     print('Creating Split %s' % k)
     pat_train = splits.index[splits[k] == 'Train']
     pat_test = splits.index[splits[k] == 'Test']
