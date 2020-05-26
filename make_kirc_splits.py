@@ -110,7 +110,8 @@ img_fnames = os.listdir(os.path.join(opt.dataroot, opt.roi_dir))
 pat2img = {}
 for pat, img_fname in zip([img_fname[:12] for img_fname in img_fnames], img_fnames):
     if pat not in pat2img.keys(): pat2img[pat] = []
-    pat2img[pat].append(img_fname)
+        if int(img_fname.split('_')[2]) < 3:
+            pat2img[pat].append(img_fname)
 
 
 ### get path_feats
