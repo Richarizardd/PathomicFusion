@@ -191,4 +191,4 @@ data_dict = {}
 data_dict['all_dataset'] = all_dataset
 data_dict['split'] = {'train':train_data, 'test':test_data}
 
-pickle.dump(data_dict, open('%s/splits/%s_%s_%d%s.pkl' % (opt.dataroot, opt.roi_dir, opt.k, opt.use_vgg_features, '_rnaseq_' % str(opt.rnaseq_cutoff)), 'wb'))
+pickle.dump(data_dict, open('%s/splits/%s_%d_%s.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features, 'rnaseq%s' % str(opt.rnaseq_cutoff)), 'wb'))
