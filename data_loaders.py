@@ -16,7 +16,7 @@ from torchvision import datasets, transforms
 # Dataset Loader
 ################
 class PathgraphomicDatasetLoader(Dataset):
-    def __init__(self, opt, data, split, mode='omic'):
+    def __init__(self, opt, data, split, mode='omic', use_aug=True):
         """
         Args:
             X = data
@@ -31,7 +31,7 @@ class PathgraphomicDatasetLoader(Dataset):
         self.g = data[split]['g']
         self.mode = mode
         
-        if split == 'train':
+        if split == 'train' and use_aug:
             self.transforms = transforms.Compose([
                                 transforms.RandomHorizontalFlip(0.5),
                                 transforms.RandomVerticalFlip(0.5),
@@ -41,6 +41,7 @@ class PathgraphomicDatasetLoader(Dataset):
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
         else:
             self.transforms = transforms.Compose([
+                                transforms.CenterCrop(opt.input_size_path),
                                 transforms.ToTensor(),
                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
