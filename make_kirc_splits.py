@@ -139,7 +139,7 @@ def getAlignedMultimodalData(opt, model, device, all_dataset, pat_split, pat2img
 
             x_patname.append(pat_name)
             x_path.append(get_vgg_features(model, device, os.path.join(opt.dataroot, opt.roi_dir, img_fname)))
-            x_grph.append(os.path.join(opt.dataroot, 'pt_bi', '%s_%s' % (opt.roi_dir, opt.graph_feat_type), grph_fname))
+            x_grph.append(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type), 'pt_bi', grph_fname))
             #x_grph.append('NaN')
             x_omic.append(np.array(all_dataset[all_dataset.index == pat_name].drop(metadata, axis=1)))
             e.append(int(all_dataset[all_dataset.index==pat_name]['censored']))
