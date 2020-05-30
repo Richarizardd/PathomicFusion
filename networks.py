@@ -248,10 +248,14 @@ class NormalizeEdgesV2(object):
         return '{}()'.format(self.__class__.__name__)
 
 
-class GraphNet(torch.nn.Module):
+from torch_geometric.nn import (SAGPooling, GraphConv, GCNConv, GATConv,
+                                SAGEConv)
+
+
+class GraphNet_Large(torch.nn.Module):
     def __init__(self, features=1036, nhid=128, grph_dim=32, nonlinearity=torch.tanh, 
-        dropout_rate=0.25, GNN='GCN', use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
-        super(GraphNet, self).__init__()
+        dropout_rate=0.25, GNN=GraphConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
+        super(GraphNet_Large, self).__init__()
 
         self.dropout_rate = dropout_rate
         self.use_edges = use_edges
@@ -307,6 +311,53 @@ class GraphNet(torch.nn.Module):
                 out = out * self.output_range + self.output_shift
 
         return features, out
+
+
+class GraphNet(torch.nn.Module):
+    def __init__(self, features=1036, nhid=128, grph_dim=32, nonlinearity=torch.tanh, 
+        dropout_rate=0.25, GNN=GraphConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
+        super(GraphNet, self).__init__()
+
+        self.dropout_rate = dropout_rate
+        self.use_edges = use_edges
+        self.act = act
+
+        self.conv1 = SAGEConv(features, nhid)
+        self.pool1 = SAGPooling(nhid, ratio=pooling_ratio)#, nonlinearity=nonlinearity)
+
+        self.lin1 = torch.nn.Linear(nhid*2, nhid)
+        self.lin2 = torch.nn.Linear(nhid, grph_dim)
+        self.lin3 = torch.nn.Linear(grph_dim, label_dim)
+
+        self.output_range = Parameter(torch.FloatTensor([6]), requires_grad=False)
+        self.output_shift = Parameter(torch.FloatTensor([-3]), requires_grad=False)
+
+        if init_max: 
+            init_max_weights(self)
+            print("Initialzing with Max")
+
+    def forward(self, **kwargs):
+        data = kwargs['x_grph']
+        data = NormalizeFeaturesV2()(data)
+        data = NormalizeEdgesV2()(data)
+        x, edge_index, edge_attr, batch = data.x, data.edge_index, data.edge_attr, data.batch
+
+        x = F.relu(self.conv1(x, edge_index))
+        x, edge_index, edge_attr, batch, _, _ = self.pool1(x, edge_index, edge_attr, batch)
+        x = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
+
+        x = F.relu(self.lin1(x))
+        x = F.dropout(x, p=self.dropout_rate, training=self.training)
+        features = F.relu(self.lin2(x))
+        out = self.lin3(features)
+        if self.act is not None:
+            out = self.act(out)
+
+            if isinstance(self.act, nn.Sigmoid):
+                out = out * self.output_range + self.output_shift
+
+        return features, out
+
 
 
 
