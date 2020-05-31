@@ -68,7 +68,7 @@ def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.
     all_dataset.index = all_dataset.index.str[:-3]
     splits = pd.read_csv(os.path.join(dataroot, 'kirc_splits.csv'), index_col=0)
     all_dataset = all_dataset.loc[splits.index]
-    metadata = ['CoS', 'censored', 'OS_month', 'train']
+    metadata = ['CoS', 'censored', 'OS_month', 'train', 'Sex', 'Age']
     return metadata, all_dataset
 
 def parse_args():
