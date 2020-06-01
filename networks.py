@@ -324,9 +324,10 @@ class GraphNet(torch.nn.Module):
 
         self.conv1 = SAGEConv(features, nhid)
         self.conv2 = SAGEConv(nhid, nhid)
-        self.pool1 = SAGPooling(nhid, ratio=pooling_ratio)#, GNN=GNN)#, nonlinearity=nonlinearity)
+        self.conv3 = SAGEConv(nhid, nhid)
+        self.pool1 = SAGPooling(nhid*3, ratio=pooling_ratio)#, GNN=GNN)#, nonlinearity=nonlinearity)
 
-        self.lin1 = torch.nn.Linear(nhid*2, nhid)
+        self.lin1 = torch.nn.Linear(nhid*6, nhid)
         self.lin2 = torch.nn.Linear(nhid, grph_dim)
         self.lin3 = torch.nn.Linear(grph_dim, label_dim)
 
@@ -337,16 +338,20 @@ class GraphNet(torch.nn.Module):
             init_max_weights(self)
             print("Initialzing with Max")
 
-    def forward(self, **kwargs):
-        data = kwargs['x_grph']
+    def forward(self, data):
         data = NormalizeFeaturesV2()(data)
         data = NormalizeEdgesV2()(data)
         x, edge_index, edge_attr, batch = data.x, data.edge_index, data.edge_attr, data.batch
 
-        x = F.relu(self.conv1(x, edge_index))
-        x = F.relu(self.conv2(x, edge_index))
+        x1 = F.relu(self.conv1(x, edge_index))
+        x2 = F.relu(self.conv2(x1, edge_index))
+        x3 = F.relu(self.conv3(x2, edge_index))
+        x = torch.cat([x1, x2, x3], dim=1)
+        
         x, edge_index, edge_attr, batch, _, _ = self.pool1(x, edge_index, edge_attr, batch)
+        print(x.shape)
         x = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
+        print(x.shape)
 
         x = F.relu(self.lin1(x))
         x = F.dropout(x, p=self.dropout_rate, training=self.training)
@@ -359,7 +364,6 @@ class GraphNet(torch.nn.Module):
                 out = out * self.output_range + self.output_shift
 
         return features, out
-
 
 
 
