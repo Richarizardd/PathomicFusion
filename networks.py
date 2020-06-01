@@ -338,7 +338,8 @@ class GraphNet(torch.nn.Module):
             init_max_weights(self)
             print("Initialzing with Max")
 
-    def forward(self, data):
+    def forward(self, **kwargs):
+        data = kwargs['x_grph']
         data = NormalizeFeaturesV2()(data)
         data = NormalizeEdgesV2()(data)
         x, edge_index, edge_attr, batch = data.x, data.edge_index, data.edge_attr, data.batch
