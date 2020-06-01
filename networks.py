@@ -350,9 +350,7 @@ class GraphNet(torch.nn.Module):
         x = torch.cat([x1, x2, x3], dim=1)
         
         x, edge_index, edge_attr, batch, _, _ = self.pool1(x, edge_index, edge_attr, batch)
-        print(x.shape)
         x = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
-        print(x.shape)
 
         x = F.relu(self.lin1(x))
         x = F.dropout(x, p=self.dropout_rate, training=self.training)
