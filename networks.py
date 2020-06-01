@@ -315,7 +315,7 @@ class GraphNet_Large(torch.nn.Module):
 
 class GraphNet(torch.nn.Module):
     def __init__(self, features=1036, nhid=128, grph_dim=32, nonlinearity=torch.tanh, 
-        dropout_rate=0.25, GNN=SageConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
+        dropout_rate=0.25, GNN=SAGEConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
         super(GraphNet, self).__init__()
 
         self.dropout_rate = dropout_rate
@@ -344,7 +344,7 @@ class GraphNet(torch.nn.Module):
         x, edge_index, edge_attr, batch = data.x, data.edge_index, data.edge_attr, data.batch
 
         x = F.relu(self.conv1(x, edge_index))
-        x = F.relu(self.conv1(x, edge_index))
+        x = F.relu(self.conv2(x, edge_index))
         x, edge_index, edge_attr, batch, _, _ = self.pool1(x, edge_index, edge_attr, batch)
         x = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
 
