@@ -517,6 +517,51 @@ def getCleanAllDataset(dataroot='./data/TCGA_GBMLGG/', ignore_missing_moltype=Fa
     all_dataset['censored'] = 1 - all_dataset['censored']
     return metadata, all_dataset
 
+def getCleanKIRC(dataroot='./', rnaseq_cutoff='all', cnv_cutoff=7.0, mut_cutoff=5.0):
+    ### Clinical variables
+    clinical = pd.read_table(os.path.join(dataroot, './kirc_tcga_pan_can_atlas_2018_clinical_data.tsv'), index_col=2)
+    clinical.index.name = None
+    clinical['censored'] = clinical['Overall Survival Status']
+    clinical['censored'] = clinical['censored'].replace('LIVING', 1)
+    clinical['censored'] = clinical['censored'].replace('DECEASED', 0)
+    clinical['censored'] = 1-clinical['censored']
+
+    ### Select RNAseq Features
+    rnaseq = pd.read_table(os.path.join(dataroot, 'data_RNA_Seq_v2_mRNA_median_Zscores.txt'), index_col=0)
+    rnaseq = rnaseq[rnaseq.index.notnull()]
+    rnaseq = rnaseq.drop(['Entrez_Gene_Id'], axis=1)
+    rnaseq.index.name = None
+    rnaseqDEGs = pd.read_csv(os.path.join(dataroot, 'dataDEGs_kirc.csv'), index_col=0)
+    rnaseqDEGs = rnaseqDEGs.sort_values(['PValue', 'logFC'], ascending=False)
+    rnaseq_cutoff = rnaseqDEGs.shape[0] if isinstance(rnaseq_cutoff, str) else rnaseq_cutoff
+    rnaseq = rnaseq.loc[rnaseq.index.intersection(rnaseqDEGs.index)].T
+    rnaseq.columns = [g+"_rnaseq" for g in rnaseq.columns]
+
+    ### Select CNV Features
+    cnv = pd.read_table(os.path.join(dataroot, 'data_CNA.txt'), index_col=0)
+    cnv = cnv[cnv.index.notnull()]
+    cnv = cnv.drop(['Entrez_Gene_Id'], axis=1)
+    cnv.index.name = None
+    cnv_freq = pd.read_table(os.path.join(dataroot, 'CNA_Genes.txt'), index_col=0)
+    cnv_freq = cnv_freq[['CNA', 'Profiled Samples', 'Freq']]
+    cnv_freq['Freq'] = cnv_freq['Freq'].str.rstrip('%').astype(float)
+    cnv_cutoff = cnv_freq.shape[0] if isinstance(cnv_cutoff, str) else cnv_cutoff
+    cnv_freq = cnv_freq[cnv_freq['Freq'] >= cnv_cutoff]
+    cnv = cnv.loc[cnv.index.intersection(cnv_freq.index)].T
+    cnv.columns = [g+"_cnv" for g in cnv.columns]
+                                 
+    mut = clinical[['Patient ID']].copy()
+    for tsv in os.listdir(os.path.join(dataroot, 'muts')):
+        if tsv.endswith('.tsv'):
+            mut_samples = pd.read_table(os.path.join(dataroot, 'muts', tsv))['Patient ID']
+            mut_gene = tsv.split('_')[2].rstrip('.tsv')+'_mut'
+            mut[mut_gene] = 0
+            mut.loc[mut.index.isin(mut_samples), mut_gene] = 1
+    mut = mut.drop(['Patient ID'], axis=1)
+    
+    omic_features = rnaseq.join(cnv, how='inner').join(mut, how='inner')
+    return omic_features
+
 
 def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic'):
     tumor_details = pd.read_csv(os.path.join(dataroot, folder, 'tumor_details.csv'))
@@ -536,6 +581,8 @@ def getCleanIvyGlioma(dataroot='./data/IvyGlioma/', folder='genomic'):
                                      use_rnaseq=use_rnaseq)
 
     all_dataset_tcga.columns = list(all_dataset_tcga.columns[:7]) + [g.lower() for g in all_dataset_tcga.columns[7:]]
+    fpkm_table_mean.insert(loc=0, column='codeletion', value=0)
+    fpkm_table_mean.insert(loc=1, column='idh mutation', value=0)
     genes_overlap = list(set(all_dataset_tcga.columns).intersection(set(bulk_rnaseq.columns)))
 
     all_dataset_ivy = tumor_details#[tumor_details['tumor_name'].isin(best_patients)]
