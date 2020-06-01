@@ -35,7 +35,7 @@ from torch_geometric.nn import GCNConv, SAGEConv, GraphConv, GatedGraphConv, GAT
 from torch_geometric.nn import GraphConv, TopKPooling, SAGPooling
 from torch_geometric.nn import global_mean_pool as gap, global_max_pool as gmp
 from torch_geometric.transforms.normalize_features import NormalizeFeatures
-
+from tqdm import tqdm
 # Env
 from fusion import *
 from options import parse_args
@@ -252,10 +252,10 @@ from torch_geometric.nn import (SAGPooling, GraphConv, GCNConv, GATConv,
                                 SAGEConv)
 
 
-class GraphNet(torch.nn.Module):
+class GraphNet_Large(torch.nn.Module):
     def __init__(self, features=1036, nhid=128, grph_dim=32, nonlinearity=torch.tanh, 
         dropout_rate=0.25, GNN=GraphConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
-        super(GraphNet, self).__init__()
+        super(GraphNet_Large, self).__init__()
 
         self.dropout_rate = dropout_rate
         self.use_edges = use_edges
@@ -313,17 +313,18 @@ class GraphNet(torch.nn.Module):
         return features, out
 
 
-class GraphNet_Small(torch.nn.Module):
+class GraphNet(torch.nn.Module):
     def __init__(self, features=1036, nhid=128, grph_dim=32, nonlinearity=torch.tanh, 
-        dropout_rate=0.25, GNN=GraphConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
-        super(GraphNet_Small, self).__init__()
+        dropout_rate=0.25, GNN=SageConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
+        super(GraphNet, self).__init__()
 
         self.dropout_rate = dropout_rate
         self.use_edges = use_edges
         self.act = act
 
         self.conv1 = SAGEConv(features, nhid)
-        self.pool1 = SAGPooling(nhid, ratio=pooling_ratio)#, nonlinearity=nonlinearity)
+        self.conv2 = SAGEConv(nhid, nhid)
+        self.pool1 = SAGPooling(nhid, ratio=pooling_ratio, GNN=GNN)#, nonlinearity=nonlinearity)
 
         self.lin1 = torch.nn.Linear(nhid*2, nhid)
         self.lin2 = torch.nn.Linear(nhid, grph_dim)
@@ -343,6 +344,7 @@ class GraphNet_Small(torch.nn.Module):
         x, edge_index, edge_attr, batch = data.x, data.edge_index, data.edge_attr, data.batch
 
         x = F.relu(self.conv1(x, edge_index))
+        x = F.relu(self.conv1(x, edge_index))
         x, edge_index, edge_attr, batch, _, _ = self.pool1(x, edge_index, edge_attr, batch)
         x = torch.cat([gmp(x, batch), gap(x, batch)], dim=1)
 
@@ -357,8 +359,6 @@ class GraphNet_Small(torch.nn.Module):
                 out = out * self.output_range + self.output_shift
 
         return features, out
-
-
 
 
 
