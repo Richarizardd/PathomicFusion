@@ -17,7 +17,7 @@ from options import parse_gpuids
 
 from tqdm import tqdm
 
-def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.0, mut_cutoff=5.0):
+def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.0, mut_cutoff=5.0, use_ag=False):
     ### Clinical variables
     clinical = pd.read_table(os.path.join(dataroot, './kirc_tcga_pan_can_atlas_2018_clinical_data.tsv'), index_col=2)
     clinical.index.name = None
@@ -68,7 +68,11 @@ def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.
     all_dataset.index = all_dataset.index.str[:-3]
     splits = pd.read_csv(os.path.join(dataroot, 'kirc_splits.csv'), index_col=0)
     all_dataset = all_dataset.loc[splits.index]
-    metadata = ['CoS', 'censored', 'OS_month', 'train', 'Sex', 'Age']
+
+    metadata = ['CoS', 'censored', 'OS_month', 'train']
+    if use_ag is False:
+        metadata.extend(['Age', 'Sex'])
+
     return metadata, all_dataset
 
 def parse_args():
@@ -82,6 +86,7 @@ def parse_args():
     parser.add_argument('--mut_cutoff', type=float, default=5.0)
     parser.add_argument('--use_vgg_features', type=int, default=0)
     parser.add_argument('--use_rnaseq', type=int, default=0)
+    parser.add_argument('--use_ag', type=int, default=0)
 
     parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints/TCGA_KIRC/', help='models are saved here')
     parser.add_argument('--exp_name', type=str, default='surv_15_rnaseq_3922', help='name of the project. It decides where to store samples and models')
@@ -103,7 +108,7 @@ def parse_args():
 
 opt = parse_args()
 device = torch.device('cuda:{}'.format(opt.gpu_ids[0])) if opt.gpu_ids else torch.device('cpu')
-metadata, all_dataset = getCleanKIRC(opt.dataroot, opt.rnaseq_cutoff, opt.cnv_cutoff, opt.mut_cutoff)
+metadata, all_dataset = getCleanKIRC(opt.dataroot, opt.rnaseq_cutoff, opt.cnv_cutoff, opt.mut_cutoff, opt.use_ag)
 
 ### Creates a mapping from TCGA ID -> Image ROI
 img_fnames = os.listdir(os.path.join(opt.dataroot, opt.roi_dir))
@@ -207,4 +212,4 @@ data_dict = {}
 data_dict['all_dataset'] = all_dataset
 data_dict['split'] = cv_splits
 
-pickle.dump(data_dict, open('%s/splits/%s_%d.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features), 'wb'))
+pickle.dump(data_dict, open('%s/splits/%s_%d%s.pkl' % (opt.dataroot, opt.roi_dir, opt.use_vgg_features, '_ag' if opt.use_ag else ''), 'wb'))

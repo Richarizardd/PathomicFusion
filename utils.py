@@ -449,7 +449,7 @@ def changeHistomolecularSubtype(data):
     return subtyped_data
 
 
-def getCleanAllDataset(dataroot='./data/TCGA_GBMLGG/', ignore_missing_moltype=False, ignore_missing_histype=False, use_rnaseq=False):
+def getCleanGBMLGG(dataroot='./data/TCGA_GBMLGG/', ignore_missing_moltype=False, ignore_missing_histype=False, use_rnaseq=False, use_ag=False):
     ### 1. Joining all_datasets.csv with grade data. Looks at columns with misisng samples
     metadata = ['Histology', 'Grade', 'Molecular subtype', 'TCGA ID', 'censored', 'Survival months']
     all_dataset = pd.read_csv(os.path.join(dataroot, 'all_dataset.csv')).drop('indexes', axis=1)
@@ -458,9 +458,11 @@ def getCleanAllDataset(dataroot='./data/TCGA_GBMLGG/', ignore_missing_moltype=Fa
     all_grade = pd.read_csv(os.path.join(dataroot, 'grade_data.csv'))
     all_grade['Histology'] = all_grade['Histology'].str.replace('astrocytoma (glioblastoma)', 'glioblastoma', regex=False)
     all_grade.index = all_grade['TCGA ID']
+    all_grade = all_grade.rename(columns={'Age at diagnosis': 'Age'})
+    all_grade['Gender'] = all_grade['Gender'].replace({'male':0, 'female': 1})
     assert pd.Series(all_dataset.index).equals(pd.Series(sorted(all_grade.index)))
 
-    all_dataset = all_dataset.join(all_grade[['Histology', 'Grade', 'Molecular subtype']], how='inner')
+    all_dataset = all_dataset.join(all_grade[['Histology', 'Grade', 'Molecular subtype', 'Age', 'Gender']], how='inner')
     cols = all_dataset.columns.tolist()
     cols = cols[-3:] + cols[:-3]
     all_dataset = all_dataset[cols]
@@ -514,6 +516,10 @@ def getCleanAllDataset(dataroot='./data/TCGA_GBMLGG/', ignore_missing_moltype=Fa
     all_dataset[['Histology']] = all_dataset[['Histology']].applymap(lambda s: hs2int.get(s) if s in hs2int else s)
     all_dataset = addHistomolecularSubtype(all_dataset)
     metadata.extend(['Histomolecular subtype'])
+
+    if use_ag is False:
+        metadata.extend(['Age', 'Gender'])
+
     all_dataset['censored'] = 1 - all_dataset['censored']
     return metadata, all_dataset
 
