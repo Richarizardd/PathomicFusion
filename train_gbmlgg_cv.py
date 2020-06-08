@@ -27,7 +27,7 @@ use_patch, roi_dir = ('_patch_', 'all_st_patches_512') if opt.use_vgg_features e
 use_rnaseq = '_rnaseq' if opt.use_rnaseq else ''
 use_ag = '_ag' if opt.use_ag else ''
 
-data_cv_path = '%s/splits/gbmlgg15cv_%s_%d_%d_%d%s%s.pkl' % (opt.dataroot, roi_dir, ignore_missing_moltype, ignore_missing_histype, opt.use_vgg_features, use_rnaseq. use_ag)
+data_cv_path = '%s/splits/gbmlgg15cv_%s_%d_%d_%d%s%s.pkl' % (opt.dataroot, roi_dir, ignore_missing_moltype, ignore_missing_histype, opt.use_vgg_features, use_rnaseq, use_ag)
 print("Loading %s" % data_cv_path)
 data_cv = pickle.load(open(data_cv_path, 'rb'))
 data_cv_splits = data_cv['cv_splits']
