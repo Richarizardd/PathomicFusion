@@ -15,6 +15,7 @@ def parse_args():
     parser.add_argument('--model_name', type=str, default='omic', help='mode')
     parser.add_argument('--use_vgg_features', type=int, default=0, help='Use pretrained embeddings')
     parser.add_argument('--use_rnaseq', type=int, default=0, help='Use RNAseq data.')
+    parser.add_argument('--use_ag', type=int, default=0, help='Use RNAseq data.')
     
     parser.add_argument('--roi_dir', type=str, default='KIRC_st', help='which structures')
     parser.add_argument('--start_k', type=int, default=1)
