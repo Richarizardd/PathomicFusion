@@ -252,10 +252,10 @@ from torch_geometric.nn import (SAGPooling, GraphConv, GCNConv, GATConv,
                                 SAGEConv)
 
 
-class GraphNet_Large(torch.nn.Module):
+class GraphNet(torch.nn.Module):
     def __init__(self, features=1036, nhid=128, grph_dim=32, nonlinearity=torch.tanh, 
         dropout_rate=0.25, GNN=GraphConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
-        super(GraphNet_Large, self).__init__()
+        super(GraphNet, self).__init__()
 
         self.dropout_rate = dropout_rate
         self.use_edges = use_edges
@@ -313,10 +313,10 @@ class GraphNet_Large(torch.nn.Module):
         return features, out
 
 
-class GraphNet(torch.nn.Module):
+class GraphNet_Small(torch.nn.Module):
     def __init__(self, features=1036, nhid=128, grph_dim=32, nonlinearity=torch.tanh, 
         dropout_rate=0.25, GNN=torch_geometric.nn.GraphConv, use_edges=0, pooling_ratio=0.20, act=None, label_dim=1, init_max=True):
-        super(GraphNet, self).__init__()
+        super(GraphNet_Small, self).__init__()
 
         self.dropout_rate = dropout_rate
         self.use_edges = use_edges
