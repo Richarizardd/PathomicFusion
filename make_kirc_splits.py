@@ -10,7 +10,6 @@ from sklearn import preprocessing
 
 # Env
 from networks import define_net
-from utils import getCleanAllDataset
 import torch
 from torchvision import transforms
 from options import parse_gpuids
