@@ -62,7 +62,7 @@ def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.
             mut_samples = pd.read_table(os.path.join(dataroot, 'muts', tsv))['Patient ID']
             mut_gene = tsv.split('_')[2].rstrip('.tsv')+'_mut'
             mut[mut_gene] = 0
-            mut.loc[mut.index.isin(mut_samples), mut_gene] = 1
+            mut.loc[mut.index[:-3].isin(mut_samples), mut_gene] = 1
     mut = mut.drop(['OS_month'], axis=1)
     
     all_dataset = clinical.join(rnaseq.join(cnv, how='inner').join(mut, how='inner'), how='inner')
@@ -70,9 +70,9 @@ def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.
     splits = pd.read_csv(os.path.join(dataroot, 'kirc_splits.csv'), index_col=0)
     all_dataset = all_dataset.loc[splits.index]
 
-    metadata = ['CoS', 'censored', 'OS_month', 'train']
-    if use_ag is False:
-        metadata.extend(['Age', 'Sex'])
+    metadata = ['CoS', 'censored', 'OS_month', 'train', 'Age', 'Sex']
+    #if use_ag is False:
+    #    metadata.extend(['Age', 'Sex'])
 
     return metadata, all_dataset
 
