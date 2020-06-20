@@ -16,6 +16,8 @@ from options import parse_gpuids
 
 from tqdm import tqdm
 
+# python make_kirc_splits.py --roi_dir KIRC_st --use_vgg_features 1 --exp_name surv_15 --gpu_ids 1
+
 def getCleanKIRC(dataroot='./data/TCGA_KIRC/', rnaseq_cutoff=3922, cnv_cutoff=7.0, mut_cutoff=5.0, use_ag=False):
     ### Clinical variables
     clinical = pd.read_table(os.path.join(dataroot, './kirc_tcga_pan_can_atlas_2018_clinical_data.tsv'), index_col=2)
@@ -141,7 +143,7 @@ def getAlignedMultimodalData(opt, model, device, all_dataset, pat_split, pat2img
             assert grph_fname in os.listdir(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type), 'pt_bi'))
             assert all_dataset[all_dataset.index == pat_name].shape[0] == 1
 
-            x_patname.append(pat_name)
+            x_patname.append(img_fname)
             x_path.append(get_vgg_features(model, device, os.path.join(opt.dataroot, opt.roi_dir, img_fname)))
             x_grph.append(os.path.join(opt.dataroot, '%s_%s' % (opt.roi_dir, opt.graph_feat_type), 'pt_bi', grph_fname))
             #x_grph.append('NaN')
